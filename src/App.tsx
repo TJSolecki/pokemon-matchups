@@ -3,6 +3,15 @@ import { useState } from "react";
 import Alert from "./components/Alert";
 import PokemonSearchSelect from "./components/PokemonSearchSelect";
 import { Pokedex } from "pokeapi-js-wrapper";
+import TypeMatchupTable from "./components/TypeMatchupTable";
+
+const sample: TypeTableData = {
+    super_effective: [{ type: "electric", multiplier: 1 / 2 }],
+    no_effect: [{ type: "poison", multiplier: 1 / 4 }],
+    not_very_effective: [{ type: "rock", multiplier: 2 }],
+    weak_to: [{ type: "water", multiplier: 2 }],
+};
+
 export default function App() {
     const [is_invalid_name, set_is_invalid_name] = useState<boolean>(false);
     async function handle_submit(e: React.SyntheticEvent) {
@@ -28,6 +37,7 @@ export default function App() {
                 is_displayed={is_invalid_name}
             />
             <PokemonSearchSelect handle_submit={handle_submit} />
+            <TypeMatchupTable type_table_data={sample} />
         </main>
     );
 }
