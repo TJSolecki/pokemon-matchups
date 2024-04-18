@@ -1,5 +1,107 @@
+import { TypeDamageRelations } from "pokeapi-js-wrapper";
+
 export function format_pokemon_name(name: string) {
     return name.replace(" ", "-").toLowerCase();
+}
+
+export function get_type_matchup_table_data(
+    type_data_list: TypeDamageRelations[],
+): TypeTableData {
+    const type_table_data: TypeTableData = {
+        super_effective: [],
+        not_very_effective: [],
+        no_effect: [],
+    };
+
+    for (const damage_relation of type_data_list) {
+        type_table_data.super_effective =
+            type_table_data.super_effective.concat(
+                damage_relation.double_damage_from.map(
+                    (relation) =>
+                        ({
+                            multiplier: 2,
+                            type: relation.name,
+                        }) as TypeMatchup,
+                ),
+            );
+        type_table_data.not_very_effective =
+            type_table_data.not_very_effective.concat(
+                damage_relation.half_damage_from.map(
+                    (relation) =>
+                        ({
+                            multiplier: 0.5,
+                            type: relation.name,
+                        }) as TypeMatchup,
+                ),
+            );
+        type_table_data.no_effect = type_table_data.no_effect.concat(
+            damage_relation.no_damage_from.map(
+                (relation) =>
+                    ({
+                        multiplier: 0,
+                        type: relation.name,
+                    }) as TypeMatchup,
+            ),
+        );
+    }
+
+    const super_effective_types = new Set(
+        type_table_data.super_effective.map((matchup) => matchup.type),
+    );
+    const not_very_effective_types = new Set(
+        type_table_data.not_very_effective.map((matchup) => matchup.type),
+    );
+
+    type_table_data.super_effective = compound_type_effects(
+        type_table_data.super_effective,
+        2,
+    ).filter(
+        (matchup) =>
+            type_table_data.no_effect.every(
+                (type) => type.type != matchup.type,
+            ) && !not_very_effective_types.has(matchup.type),
+    );
+
+    type_table_data.not_very_effective = compound_type_effects(
+        type_table_data.not_very_effective,
+        0.5,
+    ).filter(
+        (matchup) =>
+            type_table_data.no_effect.every(
+                (type) => type.type != matchup.type,
+            ) && !super_effective_types.has(matchup.type),
+    );
+
+    return type_table_data;
+}
+
+function compound_type_effects(
+    matchups: TypeMatchup[],
+    multipier: number,
+): TypeMatchup[] {
+    const histogram: Record<string, number> = {};
+    const compunded_matchups: TypeMatchup[] = [];
+    for (const matchup of matchups) {
+        if (!histogram[matchup.type]) {
+            histogram[matchup.type] = 0;
+        }
+        histogram[matchup.type]++;
+    }
+    const duplicate_types = Object.entries(histogram)
+        .filter(([_, count]) => count == 2)
+        .map((entry) => entry[0]);
+
+    for (const type of duplicate_types) {
+        compunded_matchups.push({
+            type,
+            multiplier: Math.pow(multipier, 2),
+        } as TypeMatchup);
+    }
+    const non_compound_matchups = matchups.filter((matchup) =>
+        duplicate_types.every((type) => type != matchup.type),
+    );
+
+    return compunded_matchups.concat(non_compound_matchups);
 }
 
 export const pokemon_names: string[] = [

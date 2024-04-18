@@ -27,5 +27,4 @@ interface TypeTableData {
     super_effective: TypeMatchup[];
     not_very_effective: TypeMatchup[];
     no_effect: TypeMatchup[];
-    weak_to: TypeMatchup[];
 }

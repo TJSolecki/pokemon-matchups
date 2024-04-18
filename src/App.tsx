@@ -1,19 +1,19 @@
-import { pokemon_names, format_pokemon_name } from "./utils";
+import {
+    pokemon_names,
+    format_pokemon_name,
+    get_type_matchup_table_data,
+} from "./utils";
 import { useState } from "react";
 import Alert from "./components/Alert";
 import PokemonSearchSelect from "./components/PokemonSearchSelect";
 import { Pokedex } from "pokeapi-js-wrapper";
 import TypeMatchupTable from "./components/TypeMatchupTable";
 
-const sample: TypeTableData = {
-    super_effective: [{ type: "electric", multiplier: 1 / 2 }],
-    no_effect: [{ type: "poison", multiplier: 1 / 4 }],
-    not_very_effective: [{ type: "rock", multiplier: 2 }],
-    weak_to: [{ type: "water", multiplier: 2 }],
-};
-
 export default function App() {
     const [is_invalid_name, set_is_invalid_name] = useState<boolean>(false);
+    const [type_table_data, set_type_table_data] = useState<
+        TypeTableData | undefined
+    >();
     async function handle_submit(e: React.SyntheticEvent) {
         e.preventDefault();
         const pokemon_name: string = (e.target as any)?.pokemon_name
@@ -24,8 +24,12 @@ export default function App() {
             const api = new Pokedex();
             const pokemon_data = await api.getPokemonByName(formatted_name);
             const types = pokemon_data.types.map((type) => type.type.name);
-            const type_data = await api.getTypeByName(types[0]);
-            console.log(type_data.damage_relations);
+            const matchup_data_promises = types.map(
+                async (type) =>
+                    (await api.getTypeByName(type)).damage_relations,
+            );
+            const matchup_data = await Promise.all(matchup_data_promises);
+            set_type_table_data(get_type_matchup_table_data(matchup_data));
         } else {
             set_is_invalid_name(true);
         }
@@ -37,7 +41,7 @@ export default function App() {
                 is_displayed={is_invalid_name}
             />
             <PokemonSearchSelect handle_submit={handle_submit} />
-            <TypeMatchupTable type_table_data={sample} />
+            <TypeMatchupTable type_table_data={type_table_data} />
         </main>
     );
 }
