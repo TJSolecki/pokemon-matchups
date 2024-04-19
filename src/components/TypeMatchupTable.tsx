@@ -9,11 +9,10 @@ export default function TypeMatchupTable({
 }) {
     const [type_table_data, set_type_table_data] = useState<TypeTableData>();
 
-    if (pokemon_name === undefined) {
-        return <></>;
-    }
-
     function handler() {
+        if (!pokemon_name) {
+            return;
+        }
         const api = new Pokedex();
         api.getPokemonByName(pokemon_name as string).then((pokemon_data) => {
             const types = pokemon_data.types.map((type) => type.type.name);
@@ -30,6 +29,10 @@ export default function TypeMatchupTable({
     }
 
     useEffect(handler, [pokemon_name]);
+
+    if (pokemon_name === undefined) {
+        return <></>;
+    }
 
     if (type_table_data === undefined) {
         return <></>;
