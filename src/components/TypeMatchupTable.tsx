@@ -1,12 +1,40 @@
+import { useEffect, useState } from "react";
 import TypeMatchupIcon from "./TypeMatchupIcon";
+import { Pokedex } from "pokeapi-js-wrapper";
+import { get_type_matchup_table_data } from "../utils";
 export default function TypeMatchupTable({
-    type_table_data,
+    pokemon_name,
 }: {
-    type_table_data: TypeTableData | undefined;
+    pokemon_name?: string;
 }) {
+    const [type_table_data, set_type_table_data] = useState<TypeTableData>();
+
+    if (pokemon_name === undefined) {
+        return <></>;
+    }
+
+    function handler() {
+        const api = new Pokedex();
+        api.getPokemonByName(pokemon_name as string).then((pokemon_data) => {
+            const types = pokemon_data.types.map((type) => type.type.name);
+            const matchup_data_promises = types.map((type) =>
+                api.getTypeByName(type),
+            );
+            Promise.all(matchup_data_promises).then((results) => {
+                const matchup_data = results.map(
+                    (data) => data.damage_relations,
+                );
+                set_type_table_data(get_type_matchup_table_data(matchup_data));
+            });
+        });
+    }
+
+    useEffect(handler, [pokemon_name]);
+
     if (type_table_data === undefined) {
         return <></>;
     }
+
     return (
         <table className="bg-green-400 rounded-md max-w-xl">
             <tbody className="flex flex-col gap-2 p-2">
