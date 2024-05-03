@@ -46,6 +46,7 @@ export default function TypeMatchupTable({
                     <td className="flex p-1 gap-1 flex-wrap">
                         {type_table_data.super_effective.map((type_data) => (
                             <TypeMatchupIcon
+                                key={type_data.type}
                                 type={type_data.type}
                                 multiplier={type_data.multiplier}
                             />
@@ -57,6 +58,7 @@ export default function TypeMatchupTable({
                     <td className="flex p-1 gap-1 flex-wrap">
                         {type_table_data.not_very_effective.map((type_data) => (
                             <TypeMatchupIcon
+                                key={type_data.type}
                                 type={type_data.type}
                                 multiplier={type_data.multiplier}
                             />
@@ -68,6 +70,7 @@ export default function TypeMatchupTable({
                     <td className="flex p-1 gap-1 flex-wrap">
                         {type_table_data.no_effect.map((type_data) => (
                             <TypeMatchupIcon
+                                key={type_data.type}
                                 type={type_data.type}
                                 multiplier={type_data.multiplier}
                             />

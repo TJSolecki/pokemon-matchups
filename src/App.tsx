@@ -20,7 +20,7 @@ export default function App() {
         }
     }
     return (
-        <main className="max-w-[1200px] mx-auto flex flex-col items-center">
+        <main className="max-w-[1200px] mx-auto flex flex-col items-center gap-2">
             <Alert
                 message="Please enter a valid Pokemon name"
                 is_displayed={is_invalid_name}

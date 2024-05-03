@@ -8,7 +8,7 @@ export default function Alert({
     return (
         <div
             role="alert"
-            className={`rounded border-s-4 border-red-500 bg-red-50 p-4 my-2 text-xs ${
+            className={`rounded border-s-4 border-red-500 bg-red-50 p-4 text-xs ${
                 is_displayed ? "" : "hidden"
             }`}
         >
